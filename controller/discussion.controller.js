@@ -12,8 +12,11 @@ const MessageModel = require("../model/message.model");
  * @query-param {Integer} limit - Number of discussions per page
  */
 router.get('/', async(req, res) => {
+    console.log("test")
     if (!req.query.page && !req.query.limit) {
-        const discussions = await DiscussionModel.find({'members': req.user._id})
+        console.log("test2")
+        const discussions = await DiscussionModel.find({'members.user': req.user._id})
+        console.log(discussions.length)
         return res.send({discussions: discussions})
     }
 
@@ -126,7 +129,14 @@ router.get('/:id/messages',
             return res.status(404).send({message: 'Discussion not found.'})
         }
 
-        return res.send({discussion: discussion})
+        let message
+        let messages = []
+        for (let i=0; i < discussion.messages.length; i++) {
+            message = await MessageModel.findOne({_id: discussion.messages[i]})
+            messages.push(message)
+        }
+
+        return res.send({messages: messages})
     }
 )
 
